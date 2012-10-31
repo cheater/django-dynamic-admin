@@ -40,11 +40,12 @@ def attach_inline_to_admin(model_class, model_enhancement,
 
     admin_class = get_admin_class(model_class)
     admin.site.unregister(model_class)
-    class Inline(inline_class):
-        model = model_enhancement
-    class NewModelAdmin(admin_class):
-        inlines = getattr(admin_class, 'inlines', [])
-        inlines.append(Inline)
+    Inline = type("Inline", (inline_class,), {
+        'model': model_enhancement,
+        })
+    NewModelAdmin = type("NewModelAdmin", (admin_class,), {
+        'inlines': getattr(admin_class, 'inlines', []) + [Inline]
+        })
     admin.site.register(model_class, NewModelAdmin)
 
 def add_column_to_changelist(model_class, column, link=False, prepend=False):
@@ -77,9 +78,10 @@ def add_column_to_changelist(model_class, column, link=False, prepend=False):
     if link and isinstance(column, basestring):
         new_list_display_links.append(column)
 
-    class NewModelAdmin(admin_class):
-        list_display = new_list_display
-        list_display_links = new_list_display_links
+    NewModelAdmin = type("NewModelAdmin", (admin_class,), {
+        'list_display': new_list_display,
+        'list_display_links': new_list_display_links,
+        })
     admin.site.register(model_class, NewModelAdmin)
 
 def override_admin(model_class, admin_enhancement, prefer_new=False):
@@ -105,6 +107,5 @@ def override_admin(model_class, admin_enhancement, prefer_new=False):
     x, y = admin_class, admin_enhancement
     if prefer_new:
         y, x = x, y
-    class NewModelAdmin(x, y):
-        pass
+    NewModelAdmin = type("NewModelAdmin", (x, y), {})
     admin.site.register(model_class, NewModelAdmin)
