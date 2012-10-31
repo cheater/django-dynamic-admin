@@ -69,7 +69,7 @@ def add_column_to_changelist(model_class, column, link=False, prepend=True):
         new_list_display.append(column)
     if link and repr(column) == column:
         new_list_display_links.append(column)
-    class NewModelAdmin(admin_class)
+    class NewModelAdmin(admin_class):
         list_display = new_list_display
         list_display_links = new_list_display_links
     admin.site.register(model_class, NewModelAdmin)
