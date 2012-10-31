@@ -47,7 +47,7 @@ def attach_inline_to_admin(model_class, model_enhancement,
         inlines.append(Inline)
     admin.site.register(model_class, NewModelAdmin)
 
-def add_column_to_changelist(model_class, column, link=False, prepend=True):
+def add_column_to_changelist(model_class, column, link=False, prepend=False):
     """ This function lets you add columns to the changelist of a model.
         You can use a string or a callable, just like in list_display.
         """
@@ -56,19 +56,27 @@ def add_column_to_changelist(model_class, column, link=False, prepend=True):
     new_list_display = getattr(
         admin_class,
         'list_display',
-        ['id']
+        ['pk']
         )
+    new_list_display = list(new_list_display)
     new_list_display_links = getattr(
         admin_class,
         'list_display_links',
-        [new_list_display[0]]
+        []
         )
+    if new_list_display and not new_list_display_links:
+        new_list_display_links = [new_list_display[0]]
+
+    new_list_display_links = list(new_list_display_links)
+
     if prepend:
-        new_list_display = [column] ++ new_list_display
+        new_list_display = [column] + new_list_display
     else:
         new_list_display.append(column)
-    if link and repr(column) == column:
+
+    if link and isinstance(column, basestring):
         new_list_display_links.append(column)
+
     class NewModelAdmin(admin_class):
         list_display = new_list_display
         list_display_links = new_list_display_links
