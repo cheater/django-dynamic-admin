@@ -43,10 +43,7 @@ def attach_inline_to_admin(model_class, model_enhancement,
     class Inline(inline_class):
         model = model_enhancement
     class NewModelAdmin(admin_class):
-        try:
-            inlines = admin_class.get('inlines', [])
-        except AttributeError:
-            inlines = []
+        inlines = getattr(admin_class, 'inlines', [])
         inlines.append(Inline)
     admin.site.register(model_class, NewModelAdmin)
 
